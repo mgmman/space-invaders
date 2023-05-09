@@ -1,7 +1,10 @@
+import sys
+import thorpy.loops
 import pygame
 import os
 import time
 import random
+import thorpy
 from Invader import Invader
 from Player import Player
 from Rockets import Rocket, InvaderRocket
@@ -25,6 +28,7 @@ class Game:
         self.image_folder = os.path.join(self.game_folder, 'images')
         self.all_sprites = pygame.sprite.Group()
         self.score = 0
+        self.won = False
         self.number_of_bunkers = 4
         self.mystery_ship_flying = False
         done = False
@@ -55,14 +59,16 @@ class Game:
             self.screen.fill((0, 0, 0))
 
             if len(self.invaders) == 0:
-                self.display_game_over_text("VICTORY ACHIEVED")
+                done = True
+                self.won = True
             else:
-                if len(self.invaders[-1]) == 0:
+                if len(self.invaders) != 0 and len(self.invaders[-1]) == 0:
                     self.invaders.pop()
 
-                if self.invaders[-1][0].rect.y > height - 100 or player.health <= 0:
+                if len(self.invaders) != 0 and self.invaders[-1][0].rect.y > height - 100 or player.health <= 0:
                     self.lost = True
-                    self.display_game_over_text("DEFEAT")
+                    done = True
+
 
                 if random.random() > 0.98:
                     shooting_invader = random.choice(self.invaders[-1])
@@ -83,14 +89,21 @@ class Game:
 
                 for rocket in self.invader_rockets:
                     rocket.draw()
+        if self.lost:
+            self.display_game_over_text("DEFEAT")
+        elif self.won:
+            self.display_game_over_text("VICTORY ACHIEVED")
+        print("3333")
 
-    def generate_invaders(self):
+    def generate_invaders(self, max_rows = 1):
         vertical_margin = 30
         horizontal_margin = 150
         width = 50
         row = -1
         for y in range(horizontal_margin, int(self.height / 2), width):
             row += 1
+            if row > max_rows:
+                break
             invaders_row = []
             for x in range(vertical_margin, self.width - vertical_margin, width):
                 invader = Invader(self, x, y, row)
@@ -108,8 +121,32 @@ class Game:
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 50)
         text_surface = font.render(text, False, (44, 0, 62))
-        self.screen.blit(text_surface, ((self.width - text_surface.get_width()) // 2, self.height // 2))
+        self.screen.blit(text_surface,
+                         ((self.width - text_surface.get_width()) // 2,
+                          self.height // 2 - 100))
+        thorpy.init(self.screen)
+        button = thorpy.Button("back to main menu")
+        button.at_unclick = lambda: thorpy.loops.quit_all_loops()
+        input_box = thorpy.TextInput("", placeholder="enter your name")
+        input_box.on_validation = lambda: self.write_to_leaderboard(input_box.value, self.score)
+        box = thorpy.Box([input_box, button])
+        box.center_on(self.screen)
+        loop = box.get_updater()
+        loop.launch()
 
+    def write_to_leaderboard(self, name, score):
+        with open("leaderboard.txt", "w") as lb:
+            lb.write("{:^40}{:>4}\n".format(name, score))
+
+    def draw_main_menu(self):
+        pygame.font.init()
+        font = pygame.font.SysFont('Arial', 50)
+        text_surface = font.render(text, False, (44, 0, 62))
+        self.screen.blit(text_surface,
+                         ((self.width - text_surface.get_width()) // 2,
+                          200))
+        start_button = thorpy.Button("New game")
+        start_button.at_unclick = lambda: self.run_game(done, height, player, width)
     def display_HUD_text(self, text, x, y):
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 16)
