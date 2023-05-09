@@ -4,22 +4,23 @@ import time
 
 
 class Invader(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, row):
+    def __init__(self, game, x, y, row, difficulty):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(game.image_folder, 'invader.png')).convert()
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
         self.timer = time.time()
         self.rect.x = x
+        self.difficulty = difficulty
         self.row = row
         self.rect.y = y
         self.game = game
-        self.size = 42
+        self.size = 42 - difficulty * 3
 
     def update(self):
         if time.time() - self.timer > 1:
             self.timer = time.time()
-            self.rect.y += 3
+            self.rect.y += 5 * self.difficulty
         self.check_collision(self.game)
 
     def check_collision(self, game):
@@ -29,4 +30,4 @@ class Invader(pygame.sprite.Sprite):
                 game.rockets.remove(rocket)
                 game.invaders[self.row].remove(self)
                 game.all_sprites.remove(self)
-                game.score += (10 - self.row) * 4
+                game.score += (10 - self.row) * self.difficulty * 2

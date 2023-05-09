@@ -29,16 +29,15 @@ class Game:
         self.all_sprites = pygame.sprite.Group()
         self.score = 0
         self.won = False
-        self.number_of_bunkers = 4
         self.mystery_ship_flying = False
         thorpy.init(self.screen)
         self.draw_main_menu()
 
-    def run_game(self, height, width):
+    def run_game(self, height, width, difficulty):
         thorpy.loops.quit_all_loops()
         self.screen.fill((0, 0, 0))
-        self.generate_invaders()
-        self.generate_bunkers()
+        self.generate_invaders(difficulty)
+        self.generate_bunkers(5 - difficulty)
         player = Player(self, width / 2, height - 100)
         done = False
         while not done:
@@ -72,7 +71,7 @@ class Game:
                     done = True
 
 
-                if random.random() > 0.98:
+                if random.random() > 0.99 - difficulty * 0.005:
                     shooting_invader = random.choice(self.invaders[-1])
                     invader_rocket = InvaderRocket(self, shooting_invader.rect.center[0],
                                                    shooting_invader.rect.center[1])
@@ -97,25 +96,26 @@ class Game:
             self.display_game_over_text("VICTORY ACHIEVED")
         print("3333")
 
-    def generate_invaders(self, max_rows = 1):
+    def generate_invaders(self, difficulty):
         vertical_margin = 30
         horizontal_margin = 150
+        max_rows = difficulty*2
         width = 50
         row = -1
         for y in range(horizontal_margin, int(self.height / 2), width):
             row += 1
-            if row > max_rows:
+            if row >= max_rows:
                 break
             invaders_row = []
             for x in range(vertical_margin, self.width - vertical_margin, width):
-                invader = Invader(self, x, y, row)
+                invader = Invader(self, x, y, row, difficulty)
                 invaders_row.append(invader)
                 self.all_sprites.add(invader)
             self.invaders.append(invaders_row)
 
-    def generate_bunkers(self):
+    def generate_bunkers(self, number_of_bunkers):
         vertical_margin = 30
-        width = self.width // self.number_of_bunkers
+        width = self.width // number_of_bunkers
         for x in range(vertical_margin, self.width - vertical_margin, width):
             bunker = Bunker(self, x, self.height - 200)
 
@@ -149,7 +149,7 @@ class Game:
                          ((self.width - text_surface.get_width()) // 2,
                           200))
         start_button = thorpy.Button("New game")
-        start_button._at_click = lambda: self.run_game(self.height, self.width)
+        start_button._at_click = lambda: self.draw_difficulty_selection()
         leaderboard_button = thorpy.Button("Leaderboard")
         leaderboard_button._at_click = lambda: self.draw_leaderboard()
         quit_button = thorpy.Button("Quit")
@@ -192,6 +192,28 @@ class Game:
         button._at_click = lambda: self.draw_main_menu()
         button.rect.center = (self.width // 2, self.height - 200)
         button.get_updater().launch()
+
+    def draw_difficulty_selection(self):
+        thorpy.loops.quit_all_loops()
+        self.screen.fill((0, 0, 0))
+        pygame.font.init()
+        font = pygame.font.SysFont('Arial', 50)
+        text_surface = font.render("Chose difficulty", False, (44, 0, 62))
+        self.screen.blit(text_surface,
+                         ((self.width - text_surface.get_width()) // 2,
+                          200))
+        very_easy = thorpy.Button("Very easy")
+        very_easy.at_unclick = lambda: self.run_game(self.height, self.width, 1)
+        easy = thorpy.Button("Easy")
+        easy.at_unclick = lambda: self.run_game(self.height, self.width, 2)
+        normal = thorpy.Button("Normal")
+        normal.at_unclick = lambda: self.run_game(self.height, self.width, 3)
+        hard = thorpy.Button("Hard")
+        hard.at_unclick = lambda: self.run_game(self.height, self.width, 4)
+        box = thorpy.Box([very_easy, easy, normal, hard])
+        box.center_on(self.screen)
+        box.get_updater().launch()
+
 
 
 if __name__ == '__main__':
