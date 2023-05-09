@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.size = 30
         self.rect.x = x
         self.rect.y = y
+        game.all_sprites.add(self)
 
     def update(self):
         for rocket in self.game.invader_rockets:

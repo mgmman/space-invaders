@@ -31,14 +31,16 @@ class Game:
         self.won = False
         self.number_of_bunkers = 4
         self.mystery_ship_flying = False
-        done = False
-        player = Player(self, width / 2, height-100)
-        self.all_sprites.add(player)
+        thorpy.init(self.screen)
+        self.draw_main_menu()
+
+    def run_game(self, height, width):
+        thorpy.loops.quit_all_loops()
+        self.screen.fill((0, 0, 0))
         self.generate_invaders()
         self.generate_bunkers()
-        self.run_game(done, height, player, width)
-
-    def run_game(self, done, height, player, width):
+        player = Player(self, width / 2, height - 100)
+        done = False
         while not done:
             self.display_HUD_text(f"score: {self.score}", 10, 0)
             self.display_HUD_text(f"health: {player.health}", 10, 20)
@@ -124,9 +126,8 @@ class Game:
         self.screen.blit(text_surface,
                          ((self.width - text_surface.get_width()) // 2,
                           self.height // 2 - 100))
-        thorpy.init(self.screen)
         button = thorpy.Button("back to main menu")
-        button.at_unclick = lambda: thorpy.loops.quit_all_loops()
+        button.at_unclick = lambda: self.draw_main_menu()
         input_box = thorpy.TextInput("", placeholder="enter your name")
         input_box.on_validation = lambda: self.write_to_leaderboard(input_box.value, self.score)
         box = thorpy.Box([input_box, button])
@@ -135,23 +136,47 @@ class Game:
         loop.launch()
 
     def write_to_leaderboard(self, name, score):
-        with open("leaderboard.txt", "w") as lb:
+        with open("leaderboard.txt", "a") as lb:
             lb.write("{:^40}{:>4}\n".format(name, score))
 
     def draw_main_menu(self):
+        thorpy.loops.quit_all_loops()
+        self.screen.fill((0, 0, 0))
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 50)
-        text_surface = font.render(text, False, (44, 0, 62))
+        text_surface = font.render("Space Invaders", False, (44, 0, 62))
         self.screen.blit(text_surface,
                          ((self.width - text_surface.get_width()) // 2,
                           200))
         start_button = thorpy.Button("New game")
-        start_button.at_unclick = lambda: self.run_game(done, height, player, width)
+        start_button._at_click = lambda: self.run_game(self.height, self.width)
+        leaderboard_button = thorpy.Button("Leaderboard")
+        leaderboard_button._at_click = lambda: self.draw_leaderboard()
+        quit_button = thorpy.Button("Quit")
+        quit_button.at_unclick = lambda: sys.exit(0)
+        box = thorpy.Box([start_button, leaderboard_button, quit_button])
+        box.center_on(self.screen)
+        box.get_updater().launch()
+
     def display_HUD_text(self, text, x, y):
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 16)
         text_surface = font.render(text, True, (255, 255, 255))
         self.screen.blit(text_surface, (x, y))
+
+    def draw_leaderboard(self):
+        thorpy.loops.quit_all_loops()
+        self.screen.fill((0, 0, 0))
+        pygame.font.init()
+        font = pygame.font.SysFont('Arial', 50)
+        text_surface = font.render("Leaderboard", False, (44, 0, 62))
+        self.screen.blit(text_surface,
+                         ((self.width - text_surface.get_width()) // 2,
+                          200))
+        button = thorpy.Button("back to main menu")
+        button._at_click = lambda: self.draw_main_menu()
+        button.rect.center = (self.width // 2, self.height - 200)
+        button.get_updater().launch()
 
 
 if __name__ == '__main__':
