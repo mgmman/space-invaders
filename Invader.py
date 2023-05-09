@@ -1,6 +1,7 @@
 import pygame
 import os
 import time
+import thorpy.loops
 
 
 class Invader(pygame.sprite.Sprite):
@@ -16,12 +17,17 @@ class Invader(pygame.sprite.Sprite):
         self.rect.y = y
         self.game = game
         self.size = 42 - difficulty * 3
+        game.all_sprites.add(self)
 
     def update(self):
         if time.time() - self.timer > 1:
             self.timer = time.time()
             self.rect.y += 5 * self.difficulty
         self.check_collision(self.game)
+        if self.rect.bottom >= self.game.height - 100:
+            self.game.done = True
+            self.game.lost = True
+            thorpy.loops.quit_all_loops()
 
     def check_collision(self, game):
         for rocket in game.rockets:

@@ -28,10 +28,11 @@ class Game:
         self.image_folder = os.path.join(self.game_folder, 'images')
         self.all_sprites = pygame.sprite.Group()
         self.score = 0
+        self.done = False
         self.won = False
         self.mystery_ship_flying = False
         thorpy.init(self.screen)
-        self.draw_main_menu()
+
 
     def run_game(self, height, width, difficulty):
         thorpy.loops.quit_all_loops()
@@ -39,8 +40,7 @@ class Game:
         self.generate_invaders(difficulty)
         self.generate_bunkers(5 - difficulty)
         player = Player(self, width / 2, height - 100)
-        done = False
-        while not done:
+        while not self.done:
             self.display_HUD_text(f"score: {self.score}", 10, 0)
             self.display_HUD_text(f"health: {player.health}", 10, 20)
             pressed = pygame.key.get_pressed()
@@ -65,11 +65,6 @@ class Game:
             else:
                 if len(self.invaders) != 0 and len(self.invaders[-1]) == 0:
                     self.invaders.pop()
-
-                if len(self.invaders) != 0 and self.invaders[-1][0].rect.y > height - 100 or player.health <= 0:
-                    self.lost = True
-                    done = True
-
 
                 if random.random() > 0.99 - difficulty * 0.005:
                     shooting_invader = random.choice(self.invaders[-1])
@@ -110,16 +105,17 @@ class Game:
             for x in range(vertical_margin, self.width - vertical_margin, width):
                 invader = Invader(self, x, y, row, difficulty)
                 invaders_row.append(invader)
-                self.all_sprites.add(invader)
             self.invaders.append(invaders_row)
 
     def generate_bunkers(self, number_of_bunkers):
         vertical_margin = 30
-        width = self.width // number_of_bunkers
-        for x in range(vertical_margin, self.width - vertical_margin, width):
+        margin = self.width // number_of_bunkers
+        for x in range(vertical_margin, self.width - vertical_margin, margin):
             bunker = Bunker(self, x, self.height - 200)
 
     def display_game_over_text(self, text):
+        thorpy.loops.quit_all_loops()
+        self.screen.fill((0, 0, 0))
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 50)
         text_surface = font.render(text, False, (44, 0, 62))
@@ -136,8 +132,9 @@ class Game:
         loop.launch()
 
     def write_to_leaderboard(self, name, score):
-        with open("leaderboard.txt", "a") as lb:
-            lb.write("{:^40}{:>4}\n".format(name, score))
+        if name != "":
+            with open("leaderboard.txt", "a") as lb:
+                lb.write("{:^40}{:>4}\n".format(name, score))
 
     def draw_main_menu(self):
         thorpy.loops.quit_all_loops()
@@ -218,3 +215,4 @@ class Game:
 
 if __name__ == '__main__':
     game = Game(600, 800)
+    game.draw_main_menu()

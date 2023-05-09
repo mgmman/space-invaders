@@ -1,5 +1,6 @@
 import pygame
 import os
+import thorpy.loops
 
 
 class Player(pygame.sprite.Sprite):
@@ -21,3 +22,8 @@ class Player(pygame.sprite.Sprite):
                     self.rect.y + self.size > rocket.y > self.rect.y - self.size):
                 self.game.invader_rockets.remove(rocket)
                 self.health -= 1
+                if self.health <= 0:
+                    self.game.done = True
+                    self.game.lost = True
+                    thorpy.loops.quit_all_loops()
+                    return
