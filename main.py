@@ -165,6 +165,7 @@ class Game:
         self.screen.blit(text_surface, (x, y))
 
     def draw_leaderboard(self):
+        top10_list = []
         thorpy.loops.quit_all_loops()
         self.screen.fill((0, 0, 0))
         pygame.font.init()
@@ -173,6 +174,20 @@ class Game:
         self.screen.blit(text_surface,
                          ((self.width - text_surface.get_width()) // 2,
                           200))
+        with open("leaderboard.txt") as lb:
+            top10_list = lb.read().split('\n')
+        top10_list = top10_list[:-1]
+        top10_list = sorted(top10_list, key=lambda x: int(x.split()[-1]), reverse=True)
+        leaderboard_start = 300
+        leader_font = font = pygame.font.SysFont('Arial', 20)
+        for i in range(10):
+            if i >= len(top10_list):
+                break
+            leader_text = font.render(f"{i+1}. " + top10_list[i], True, (100, 0, 200))
+            self.screen.blit(leader_text,
+                             ((self.width - text_surface.get_width()) // 2,
+                              leaderboard_start + i*20))
+
         button = thorpy.Button("back to main menu")
         button._at_click = lambda: self.draw_main_menu()
         button.rect.center = (self.width // 2, self.height - 200)
