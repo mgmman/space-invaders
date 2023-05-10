@@ -51,7 +51,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    done = True
+                    sys.exit(0)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not self.lost:
                     self.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
 
@@ -89,7 +89,6 @@ class Game:
             self.display_game_over_text("DEFEAT")
         elif self.won:
             self.display_game_over_text("VICTORY ACHIEVED")
-        print("3333")
 
     def generate_invaders(self, difficulty):
         vertical_margin = 30
@@ -209,6 +208,7 @@ class Game:
         hard.at_unclick = lambda: self.run_game(self.height, self.width, 4)
         box = thorpy.Box([very_easy, easy, normal, hard])
         box.center_on(self.screen)
+        time.sleep(0.1)
         box.get_updater().launch()
 
 
