@@ -11,7 +11,7 @@ from Player import Player
 from Rockets import Rocket, InvaderRocket
 from Bunker import Bunker
 from MysteryShip import MysteryShip
-from main import Game
+from SpaceInvaders import Game
 
 
 class TestSuite(unittest.TestCase):
