@@ -9,6 +9,7 @@ class MysteryShip(pygame.sprite.Sprite):
         self.image = pygame.image.load(os.path.join(game.image_folder, 'mystery_ship.png')).convert()
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
+        self.explosion_sound = pygame.mixer.Sound(os.path.join(game.sounds_folder, 'explosion.mp3'))
         self.game = game
         self.health = 3
         self.size = 100
@@ -24,6 +25,7 @@ class MysteryShip(pygame.sprite.Sprite):
                 self.game.rockets.remove(rocket)
                 self.game.all_sprites.remove(self)
                 self.game.score += random.choice([50, 100, 150, 200])
+                self.explosion_sound.play()
                 self.game.mystery_ship_flying = False
         if self.rect.right <= 0:
             self.game.all_sprites.remove(self)

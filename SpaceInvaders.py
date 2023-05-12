@@ -26,8 +26,12 @@ class Game:
         self.clock = pygame.time.Clock()
         self.game_folder = os.path.dirname(__file__)
         self.image_folder = os.path.join(self.game_folder, 'images')
+        self.sounds_folder = os.path.join(self.game_folder, 'sounds')
         self.all_sprites = pygame.sprite.Group()
         self.score = 0
+        self.rocket_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'rocket.mp3'))
+        self.game_over_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'game_over.mp3'))
+        self.win_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'win.mp3'))
         self.done = False
         self.won = False
         self.mystery_ship_flying = False
@@ -39,6 +43,8 @@ class Game:
         self.screen.fill((0, 0, 0))
         self.generate_invaders(difficulty)
         self.generate_bunkers(5 - difficulty)
+        pygame.mixer.music.load(os.path.join(game.sounds_folder, 'music.mp3'))
+        pygame.mixer.music.play(-1)
         player = Player(self, width / 2, height - 100)
         while not self.done:
             self.display_HUD_text(f"score: {self.score}", 10, 0)
@@ -54,6 +60,7 @@ class Game:
                     sys.exit(0)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not self.lost:
                     self.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
+                    self.rocket_sound.play()
 
             pygame.display.flip()
             self.clock.tick(60)
@@ -71,6 +78,7 @@ class Game:
                     invader_rocket = InvaderRocket(self, shooting_invader.rect.center[0],
                                                    shooting_invader.rect.center[1])
                     self.invader_rockets.append(invader_rocket)
+                    self.rocket_sound.play()
 
                 if not self.mystery_ship_flying and random.random() > 0.999:
                     MysteryShip(self)
@@ -85,9 +93,12 @@ class Game:
 
                 for rocket in self.invader_rockets:
                     rocket.draw()
+        pygame.mixer.music.stop()
         if self.lost:
+            self.game_over_sound.play()
             self.display_game_over_text("DEFEAT")
         elif self.won:
+            self.win_sound.play()
             self.display_game_over_text("VICTORY ACHIEVED")
 
     def generate_invaders(self, difficulty):

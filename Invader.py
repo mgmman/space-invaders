@@ -12,6 +12,7 @@ class Invader(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.timer = time.time()
         self.rect.x = x
+        self.explosion_sound = pygame.mixer.Sound(os.path.join(game.sounds_folder, 'explosion.mp3'))
         self.difficulty = difficulty
         self.row = row
         self.rect.y = y
@@ -37,3 +38,4 @@ class Invader(pygame.sprite.Sprite):
                 game.invaders[self.row].remove(self)
                 game.all_sprites.remove(self)
                 game.score += (10 - self.row) * self.difficulty * 2
+                self.explosion_sound.play()

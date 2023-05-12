@@ -9,6 +9,7 @@ class Bunker(pygame.sprite.Sprite):
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
         self.game = game
+        self.explosion_sound = pygame.mixer.Sound(os.path.join(game.sounds_folder, 'explosion.mp3'))
         self.health = 3
         self.size = 40
         self.rect.x = x
@@ -21,6 +22,7 @@ class Bunker(pygame.sprite.Sprite):
                     self.rect.y + self.size > rocket.y > self.rect.y - self.size):
                 self.game.invader_rockets.remove(rocket)
                 self.health -= 1
+                self.explosion_sound.play()
                 if self.health <= 0:
                     self.game.all_sprites.remove(self)
                 else:
