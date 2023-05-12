@@ -7,7 +7,10 @@ import thorpy.loops
 class Invader(pygame.sprite.Sprite):
     def __init__(self, game, x, y, row, difficulty):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(game.image_folder, 'invader.png')).convert()
+        if row % 2 == 0:
+            self.image = pygame.image.load(os.path.join(game.image_folder, 'invader.png')).convert()
+        else:
+            self.image = pygame.image.load(os.path.join(game.image_folder, 'invader_2.png')).convert()
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
         self.timer = time.time()

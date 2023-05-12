@@ -6,6 +6,7 @@ class Bunker(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(game.image_folder, 'bunker_full_health.png')).convert()
+        self.image.set_alpha(90)
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
         self.game = game
@@ -34,3 +35,4 @@ class Bunker(pygame.sprite.Sprite):
         else:
             self.image = pygame.image.load(os.path.join(self.game.image_folder, 'bunker_low_health.png')).convert()
         self.image.set_colorkey((255, 255, 255))
+        self.image.set_alpha(90)
