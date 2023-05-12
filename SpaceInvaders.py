@@ -40,6 +40,14 @@ class Game:
 
     def run_game(self, height, width, difficulty):
         thorpy.loops.quit_all_loops()
+        self.all_sprites.empty()
+        self.done = False
+        self.won = False
+        self.mystery_ship_flying = False
+        self.invaders = []
+        self.invader_rockets = []
+        self.rockets = []
+        self.lost = False
         self.screen.fill((0, 0, 0))
         self.generate_invaders(difficulty)
         self.generate_bunkers(5 - difficulty)
@@ -58,16 +66,19 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not self.lost:
-                    self.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
-                    self.rocket_sound.play()
+                if event.type == pygame.KEYDOWN and not self.lost:
+                    if event.key == pygame.K_SPACE:
+                        self.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
+                        self.rocket_sound.play()
+                    if event.key == pygame.K_ESCAPE:
+                        self.draw_pause()
 
             pygame.display.flip()
             self.clock.tick(60)
             self.screen.fill((0, 0, 0))
 
             if len(self.invaders) == 0:
-                done = True
+                self.done = True
                 self.won = True
             else:
                 if len(self.invaders) != 0 and len(self.invaders[-1]) == 0:
@@ -122,6 +133,15 @@ class Game:
         margin = self.width // number_of_bunkers
         for x in range(vertical_margin, self.width - vertical_margin, margin):
             bunker = Bunker(self, x, self.height - 200)
+
+    def draw_pause(self):
+        resume_button = thorpy.Button("resume")
+        resume_button.at_unclick = lambda: thorpy.loops.quit_current_loop()
+        back_button = thorpy.Button("back to main menu")
+        back_button.at_unclick = lambda: self.draw_main_menu()
+        box = thorpy.TitleBox("Paused", [resume_button, back_button])
+        box.center_on(self.screen)
+        box.get_updater().launch()
 
     def display_game_over_text(self, text):
         thorpy.loops.quit_all_loops()
