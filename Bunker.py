@@ -3,7 +3,7 @@ import pygame
 
 
 class Bunker(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, game_state):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(game.image_folder, 'bunker_full_health.png')).convert()
         self.image.set_alpha(90)
@@ -12,16 +12,17 @@ class Bunker(pygame.sprite.Sprite):
         self.game = game
         self.explosion_sound = pygame.mixer.Sound(os.path.join(game.sounds_folder, 'explosion.mp3'))
         self.health = 3
+        self.game_state = game_state
         self.size = 40
         self.rect.x = x
         self.rect.y = y
         game.all_sprites.add(self)
 
     def update(self):
-        for rocket in self.game.invader_rockets:
+        for rocket in self.game_state.invader_rockets:
             if (self.rect.x + self.size > rocket.x > self.rect.x - self.size and
                     self.rect.y + self.size > rocket.y > self.rect.y - self.size):
-                self.game.invader_rockets.remove(rocket)
+                self.game_state.invader_rockets.remove(rocket)
                 self.health -= 1
                 self.explosion_sound.play()
                 if self.health <= 0:

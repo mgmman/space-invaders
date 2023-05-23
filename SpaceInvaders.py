@@ -1,23 +1,19 @@
 import sys
+import thorpy
 import thorpy.loops
 import pygame
 import os
 import time
 import random
-import thorpy
 from Invader import Invader
 from Player import Player
 from Rockets import Rocket, InvaderRocket
 from Bunker import Bunker
 from MysteryShip import MysteryShip
+from GameState import GameState
 
 
 class Game:
-    invaders = []
-    invader_rockets = []
-    rockets = []
-    lost = False
-
     def __init__(self, width, height):
         pygame.init()
         self.width = width
@@ -28,34 +24,23 @@ class Game:
         self.image_folder = os.path.join(self.game_folder, 'images')
         self.sounds_folder = os.path.join(self.game_folder, 'sounds')
         self.all_sprites = pygame.sprite.Group()
-        self.score = 0
         self.rocket_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'rocket.mp3'))
         self.game_over_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'game_over.mp3'))
         self.win_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'win.mp3'))
-        self.done = False
-        self.won = False
-        self.mystery_ship_flying = False
         thorpy.init(self.screen)
 
-
     def run_game(self, height, width, difficulty):
+        game_state = GameState()
         thorpy.loops.quit_all_loops()
         self.all_sprites.empty()
-        self.done = False
-        self.won = False
-        self.mystery_ship_flying = False
-        self.invaders = []
-        self.invader_rockets = []
-        self.rockets = []
-        self.lost = False
         self.screen.fill((0, 0, 0))
-        self.generate_invaders(difficulty)
-        self.generate_bunkers(5 - difficulty)
+        self.generate_invaders(difficulty, game_state)
+        self.generate_bunkers(5 - difficulty, game_state)
         pygame.mixer.music.load(os.path.join(game.sounds_folder, 'music.mp3'))
         pygame.mixer.music.play(-1)
-        player = Player(self, width / 2, height - 100)
-        while not self.done:
-            self.display_HUD_text(f"score: {self.score}", 10, 0)
+        player = Player(self, width / 2, height - 100, game_state)
+        while not game_state.done:
+            self.display_HUD_text(f"score: {game_state.score}", 10, 0)
             self.display_HUD_text(f"health: {player.health}", 10, 20)
             pressed = pygame.key.get_pressed()
             if pressed[pygame.K_LEFT]:
@@ -66,9 +51,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
-                if event.type == pygame.KEYDOWN and not self.lost:
+                if event.type == pygame.KEYDOWN and not game_state.lost:
                     if event.key == pygame.K_SPACE:
-                        self.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
+                        game_state.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
                         self.rocket_sound.play()
                     if event.key == pygame.K_ESCAPE:
                         self.draw_pause()
@@ -77,42 +62,42 @@ class Game:
             self.clock.tick(60)
             self.screen.fill((0, 0, 0))
 
-            if len(self.invaders) == 0:
-                self.done = True
-                self.won = True
+            if len(game_state.invaders) == 0:
+                game_state.done = True
+                game_state.won = True
             else:
-                if len(self.invaders) != 0 and len(self.invaders[-1]) == 0:
-                    self.invaders.pop()
+                if len(game_state.invaders) != 0 and len(game_state.invaders[-1]) == 0:
+                    game_state.invaders.pop()
 
                 if random.random() > 0.99 - difficulty * 0.005:
-                    shooting_invader = random.choice(self.invaders[-1])
+                    shooting_invader = random.choice(game_state.invaders[-1])
                     invader_rocket = InvaderRocket(self, shooting_invader.rect.center[0],
                                                    shooting_invader.rect.center[1])
-                    self.invader_rockets.append(invader_rocket)
+                    game_state.invader_rockets.append(invader_rocket)
                     self.rocket_sound.play()
 
-                if not self.mystery_ship_flying and random.random() > 0.999:
-                    MysteryShip(self)
-                    self.mystery_ship_flying = True
+                if not game_state.mystery_ship_flying and random.random() > 0.999:
+                    MysteryShip(self, game_state)
+                    game_state.mystery_ship_flying = True
 
-            if not self.lost:
+            if not game_state.lost:
                 self.all_sprites.update()
                 self.all_sprites.draw(self.screen)
 
-                for rocket in self.rockets:
+                for rocket in game_state.rockets:
                     rocket.draw()
 
-                for rocket in self.invader_rockets:
+                for rocket in game_state.invader_rockets:
                     rocket.draw()
         pygame.mixer.music.stop()
-        if self.lost:
+        if game_state.lost:
             self.game_over_sound.play()
-            self.display_game_over_text("DEFEAT")
-        elif self.won:
+            self.display_game_over_text("DEFEAT", game_state)
+        elif game_state.won:
             self.win_sound.play()
-            self.display_game_over_text("VICTORY ACHIEVED")
+            self.display_game_over_text("VICTORY ACHIEVED", game_state)
 
-    def generate_invaders(self, difficulty):
+    def generate_invaders(self, difficulty, game_state):
         vertical_margin = 30
         horizontal_margin = 150
         max_rows = difficulty*2
@@ -124,15 +109,15 @@ class Game:
                 break
             invaders_row = []
             for x in range(vertical_margin, self.width - vertical_margin, width):
-                invader = Invader(self, x, y, row, difficulty)
+                invader = Invader(self, x, y, row, difficulty, game_state)
                 invaders_row.append(invader)
-            self.invaders.append(invaders_row)
+            game_state.invaders.append(invaders_row)
 
-    def generate_bunkers(self, number_of_bunkers):
+    def generate_bunkers(self, number_of_bunkers, game_state):
         vertical_margin = 30
         margin = self.width // number_of_bunkers
         for x in range(vertical_margin, self.width - vertical_margin, margin):
-            bunker = Bunker(self, x, self.height - 200)
+            Bunker(self, x, self.height - 200, game_state)
 
     def draw_pause(self):
         resume_button = thorpy.Button("resume")
@@ -143,7 +128,7 @@ class Game:
         box.center_on(self.screen)
         box.get_updater().launch()
 
-    def display_game_over_text(self, text):
+    def display_game_over_text(self, text, game_state):
         thorpy.loops.quit_all_loops()
         self.screen.fill((0, 0, 0))
         pygame.font.init()
@@ -155,7 +140,7 @@ class Game:
         button = thorpy.Button("back to main menu")
         button.at_unclick = lambda: self.draw_main_menu()
         input_box = thorpy.TextInput("", placeholder="enter your name")
-        input_box.on_validation = lambda: self.write_to_leaderboard(input_box.value, self.score)
+        input_box.on_validation = lambda: self.write_to_leaderboard(input_box.value, game_state.score)
         box = thorpy.Box([input_box, button])
         box.center_on(self.screen)
         loop = box.get_updater()
@@ -241,7 +226,6 @@ class Game:
         box.center_on(self.screen)
         time.sleep(0.1)
         box.get_updater().launch()
-
 
 
 if __name__ == '__main__':

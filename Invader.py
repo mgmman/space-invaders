@@ -5,7 +5,8 @@ import thorpy.loops
 
 
 class Invader(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, row, difficulty):
+    def __init__(self, game, x, y, row, difficulty, game_state):
+        self.game_state = game_state
         pygame.sprite.Sprite.__init__(self)
         if row % 2 == 0:
             self.image = pygame.image.load(os.path.join(game.image_folder, 'invader.png')).convert()
@@ -27,18 +28,18 @@ class Invader(pygame.sprite.Sprite):
         if time.time() - self.timer > 1:
             self.timer = time.time()
             self.rect.y += 5 * self.difficulty
-        self.check_collision(self.game)
+        self.check_collision()
         if self.rect.bottom >= self.game.height - 100:
-            self.game.done = True
-            self.game.lost = True
+            self.game_state.done = True
+            self.game_state.lost = True
             thorpy.loops.quit_all_loops()
 
-    def check_collision(self, game):
-        for rocket in game.rockets:
+    def check_collision(self):
+        for rocket in self.game_state.rockets:
             if (self.rect.x + self.size > rocket.x > self.rect.x - self.size and
                     self.rect.y + self.size > rocket.y > self.rect.y - self.size):
-                game.rockets.remove(rocket)
-                game.invaders[self.row].remove(self)
-                game.all_sprites.remove(self)
-                game.score += (10 - self.row) * self.difficulty * 2
+                self.game_state.rockets.remove(rocket)
+                self.game_state.invaders[self.row].remove(self)
+                self.game.all_sprites.remove(self)
+                self.game_state.score += (10 - self.row) * self.difficulty * 2
                 self.explosion_sound.play()
