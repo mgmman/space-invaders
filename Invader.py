@@ -5,7 +5,7 @@ import thorpy.loops
 
 
 class Invader(pygame.sprite.Sprite):
-    def __init__(self, game_resources, x, y, row, difficulty, game_state):
+    def __init__(self, game_resources, x, y, row, game_state):
         self.game_state = game_state
         pygame.sprite.Sprite.__init__(self)
         if row % 2 == 0:
@@ -17,10 +17,10 @@ class Invader(pygame.sprite.Sprite):
         self.timer = time.time()
         self.rect.x = x
         self.explosion_sound = game_resources.get_sound('explosion.mp3')
-        self.difficulty = difficulty
+        self.difficulty = game_state.difficulty
         self.row = row
         self.rect.y = y
-        self.size = 42 - difficulty * 3
+        self.size = 42 - game_state.difficulty * 3
         game_state.all_sprites.add(self)
 
     def update(self):

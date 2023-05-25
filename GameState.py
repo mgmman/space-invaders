@@ -2,10 +2,11 @@ import pygame
 
 
 class GameState:
-    def __init__(self, height, width):
+    def __init__(self, height, width, difficulty):
         self.invaders = []
         self.height = height
         self.width = width
+        self.difficulty = difficulty
         self.invader_rockets = []
         self.rockets = []
         self.lost = False

@@ -28,11 +28,11 @@ class Game:
         thorpy.init(self.screen)
 
     def run_game(self, height, width, difficulty):
-        game_state = GameState(height, width)
+        game_state = GameState(height, width, difficulty)
         thorpy.loops.quit_all_loops()
         self.screen.fill((0, 0, 0))
-        self.generate_invaders(difficulty, game_state)
-        self.generate_bunkers(5 - difficulty, game_state)
+        self.generate_invaders(game_state)
+        self.generate_bunkers(game_state)
         pygame.mixer.music.load(
             os.path.join(
                 self.game_resources.sounds_folder,
@@ -97,10 +97,10 @@ class Game:
             self.win_sound.play()
             self.display_game_over_text("VICTORY ACHIEVED", game_state)
 
-    def generate_invaders(self, difficulty, game_state):
+    def generate_invaders(self, game_state):
         vertical_margin = 30
         horizontal_margin = 150
-        max_rows = difficulty*2
+        max_rows = game_state.difficulty*2
         width = 50
         row = -1
         for y in range(horizontal_margin, int(self.height / 2), width):
@@ -109,13 +109,13 @@ class Game:
                 break
             invaders_row = []
             for x in range(vertical_margin, self.width - vertical_margin, width):
-                invader = Invader(self.game_resources, x, y, row, difficulty, game_state)
+                invader = Invader(self.game_resources, x, y, row, game_state)
                 invaders_row.append(invader)
             game_state.invaders.append(invaders_row)
 
-    def generate_bunkers(self, number_of_bunkers, game_state):
+    def generate_bunkers(self, game_state):
         vertical_margin = 30
-        margin = self.width // number_of_bunkers
+        margin = self.width // (5 - game_state.difficulty)
         for x in range(vertical_margin, self.width - vertical_margin, margin):
             Bunker(self.game_resources, x, self.height - 200, game_state)
 
