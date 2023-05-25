@@ -22,18 +22,9 @@ class Game:
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
         self.game_resources = GameResources()
-        self.rocket_sound = pygame.mixer.Sound(
-            os.path.join(
-                self.game_resources.sounds_folder,
-                'rocket.mp3'))
-        self.game_over_sound = pygame.mixer.Sound(
-            os.path.join(
-                self.game_resources.sounds_folder,
-                'game_over.mp3'))
-        self.win_sound = pygame.mixer.Sound(
-            os.path.join(
-                self.game_resources.sounds_folder,
-                'win.mp3'))
+        self.rocket_sound = self.game_resources.get_sound('rocket.mp3')
+        self.game_over_sound = self.game_resources.get_sound('game_over.mp3')
+        self.win_sound = self.game_resources.get_sound('win.mp3')
         thorpy.init(self.screen)
 
     def run_game(self, height, width, difficulty):

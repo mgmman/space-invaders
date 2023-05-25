@@ -9,25 +9,14 @@ class Invader(pygame.sprite.Sprite):
         self.game_state = game_state
         pygame.sprite.Sprite.__init__(self)
         if row % 2 == 0:
-            self.image = pygame.image.load(
-                os.path.join(
-                    game_resources.image_folder,
-                    'invader.png'
-                )).convert()
+            self.image = game_resources.get_image('invader.png')
         else:
-            self.image = pygame.image.load(
-                os.path.join(
-                    game_resources.image_folder,
-                    'invader_2.png'
-                )).convert()
+            self.image = game_resources.get_image('invader_2.png')
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
         self.timer = time.time()
         self.rect.x = x
-        self.explosion_sound = pygame.mixer.Sound(
-            os.path.join(
-                game_resources.sounds_folder,
-                'explosion.mp3'))
+        self.explosion_sound = game_resources.get_sound('explosion.mp3')
         self.difficulty = difficulty
         self.row = row
         self.rect.y = y

@@ -5,18 +5,11 @@ import pygame
 class Bunker(pygame.sprite.Sprite):
     def __init__(self, game_resources, x, y, game_state):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(
-            os.path.join(
-                game_resources.image_folder,
-                'bunker_full_health.png'
-        )).convert()
+        self.image = game_resources.get_image('bunker_full_health.png')
         self.image.set_alpha(90)
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
-        self.explosion_sound = pygame.mixer.Sound(
-            os.path.join(
-                game_resources.sounds_folder,
-                'explosion.mp3'))
+        self.explosion_sound = game_resources.get_sound('explosion.mp3')
         self.health = 3
         self.game_resources = game_resources
         self.game_state = game_state
@@ -40,16 +33,8 @@ class Bunker(pygame.sprite.Sprite):
 
     def change_sprite(self):
         if self.health == 2:
-            self.image = pygame.image.load(
-                os.path.join(
-                    self.game_resources.image_folder,
-                    'bunker_half_health.png'
-                )).convert()
+            self.image = self.game_resources.get_image('bunker_half_health.png')
         else:
-            self.image = pygame.image.load(
-                os.path.join(
-                    self.game_resources.image_folder,
-                    'bunker_low_health.png'
-                )).convert()
+            self.image = self.game_resources.get_image('bunker_low_health.png')
         self.image.set_colorkey((255, 255, 255))
         self.image.set_alpha(90)

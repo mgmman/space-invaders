@@ -6,17 +6,10 @@ import random
 class MysteryShip(pygame.sprite.Sprite):
     def __init__(self, game_resources, game_state):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(
-            os.path.join(
-                game_resources.image_folder,
-                'mystery_ship.png'
-            )).convert()
+        self.image = game_resources.get_image('mystery_ship.png')
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect()
-        self.explosion_sound = pygame.mixer.Sound(
-            os.path.join(
-                game_resources.sounds_folder,
-                'explosion.mp3'))
+        self.explosion_sound = game_resources.get_sound('explosion.mp3')
         self.game_state = game_state
         self.health = 3
         self.size = 100

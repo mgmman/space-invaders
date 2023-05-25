@@ -6,9 +6,9 @@ import thorpy.loops
 class Player(pygame.sprite.Sprite):
     def __init__(self, game_resources, x, y, game_state):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(game_resources.image_folder, 'player.png')).convert()
+        self.image = game_resources.get_image('player.png')
         self.image.set_colorkey((255, 255, 255))
-        self.life_lost_sound = pygame.mixer.Sound(os.path.join(game_resources.sounds_folder, 'life_lost.mp3'))
+        self.life_lost_sound = game_resources.get_sound('life_lost.mp3')
         self.rect = self.image.get_rect()
         self.game_state = game_state
         self.health = 3
