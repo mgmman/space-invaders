@@ -11,6 +11,7 @@ from Rockets import Rocket, InvaderRocket
 from Bunker import Bunker
 from MysteryShip import MysteryShip
 from GameState import GameState
+from GameResources import GameResources
 
 
 class Game:
@@ -20,25 +21,33 @@ class Game:
         self.height = height
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
-        self.game_folder = os.path.dirname(__file__)
-        self.image_folder = os.path.join(self.game_folder, 'images')
-        self.sounds_folder = os.path.join(self.game_folder, 'sounds')
-        self.all_sprites = pygame.sprite.Group()
-        self.rocket_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'rocket.mp3'))
-        self.game_over_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'game_over.mp3'))
-        self.win_sound = pygame.mixer.Sound(os.path.join(self.sounds_folder, 'win.mp3'))
+        self.game_resources = GameResources()
+        self.rocket_sound = pygame.mixer.Sound(
+            os.path.join(
+                self.game_resources.sounds_folder,
+                'rocket.mp3'))
+        self.game_over_sound = pygame.mixer.Sound(
+            os.path.join(
+                self.game_resources.sounds_folder,
+                'game_over.mp3'))
+        self.win_sound = pygame.mixer.Sound(
+            os.path.join(
+                self.game_resources.sounds_folder,
+                'win.mp3'))
         thorpy.init(self.screen)
 
     def run_game(self, height, width, difficulty):
-        game_state = GameState()
+        game_state = GameState(height, width)
         thorpy.loops.quit_all_loops()
-        self.all_sprites.empty()
         self.screen.fill((0, 0, 0))
         self.generate_invaders(difficulty, game_state)
         self.generate_bunkers(5 - difficulty, game_state)
-        pygame.mixer.music.load(os.path.join(game.sounds_folder, 'music.mp3'))
+        pygame.mixer.music.load(
+            os.path.join(
+                self.game_resources.sounds_folder,
+                'music.mp3'))
         pygame.mixer.music.play(-1)
-        player = Player(self, width / 2, height - 100, game_state)
+        player = Player(self.game_resources, width / 2, height - 100, game_state)
         while not game_state.done:
             self.display_HUD_text(f"score: {game_state.score}", 10, 0)
             self.display_HUD_text(f"health: {player.health}", 10, 20)
@@ -53,7 +62,10 @@ class Game:
                     sys.exit(0)
                 if event.type == pygame.KEYDOWN and not game_state.lost:
                     if event.key == pygame.K_SPACE:
-                        game_state.rockets.append(Rocket(self, player.rect.center[0], player.rect.center[1]))
+                        game_state.rockets.append(Rocket(self.game_resources,
+                                                         game_state,
+                                                         player.rect.center[0],
+                                                         player.rect.center[1]))
                         self.rocket_sound.play()
                     if event.key == pygame.K_ESCAPE:
                         self.draw_pause()
@@ -71,24 +83,21 @@ class Game:
 
                 if random.random() > 0.99 - difficulty * 0.005:
                     shooting_invader = random.choice(game_state.invaders[-1])
-                    invader_rocket = InvaderRocket(self, shooting_invader.rect.center[0],
+                    invader_rocket = InvaderRocket(self.game_resources,
+                                                   game_state,
+                                                   shooting_invader.rect.center[0],
                                                    shooting_invader.rect.center[1])
                     game_state.invader_rockets.append(invader_rocket)
                     self.rocket_sound.play()
 
                 if not game_state.mystery_ship_flying and random.random() > 0.999:
-                    MysteryShip(self, game_state)
+                    MysteryShip(self.game_resources, game_state)
                     game_state.mystery_ship_flying = True
 
             if not game_state.lost:
-                self.all_sprites.update()
-                self.all_sprites.draw(self.screen)
+                game_state.all_sprites.update()
+                game_state.all_sprites.draw(self.screen)
 
-                for rocket in game_state.rockets:
-                    rocket.draw()
-
-                for rocket in game_state.invader_rockets:
-                    rocket.draw()
         pygame.mixer.music.stop()
         if game_state.lost:
             self.game_over_sound.play()
@@ -109,7 +118,7 @@ class Game:
                 break
             invaders_row = []
             for x in range(vertical_margin, self.width - vertical_margin, width):
-                invader = Invader(self, x, y, row, difficulty, game_state)
+                invader = Invader(self.game_resources, x, y, row, difficulty, game_state)
                 invaders_row.append(invader)
             game_state.invaders.append(invaders_row)
 
@@ -117,7 +126,7 @@ class Game:
         vertical_margin = 30
         margin = self.width // number_of_bunkers
         for x in range(vertical_margin, self.width - vertical_margin, margin):
-            Bunker(self, x, self.height - 200, game_state)
+            Bunker(self.game_resources, x, self.height - 200, game_state)
 
     def draw_pause(self):
         resume_button = thorpy.Button("resume")

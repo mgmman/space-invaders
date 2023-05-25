@@ -14,13 +14,15 @@ from Bunker import Bunker
 from MysteryShip import MysteryShip
 from SpaceInvaders import Game
 from GameState import GameState
+from GameResources import GameResources
 
 
 class CollisionAndDestructionTests(unittest.TestCase):
     def test_rocket_destroys_invader(self):
         game = Game(600, 800)
-        game_state = GameState()
-        invader = Invader(game, 0, 0, 0, 1, game_state)
+        game_resources = GameResources()
+        game_state = GameState(600, 800)
+        invader = Invader(game_resources, 0, 0, 0, 1, game_state)
         game_state.invaders = [[invader]]
         prev_score = game_state.score
         self.assertEqual(len(game_state.invaders), 1)
@@ -33,8 +35,8 @@ class CollisionAndDestructionTests(unittest.TestCase):
         self.assertGreater(game_state.score, prev_score)
 
     def test_player_takes_damage(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         player = Player(game, game.width / 2, game.height - 100, game_state)
         rocket = InvaderRocket(game, game.width / 2, game.height - 100)
         game_state.invader_rockets = [rocket]
@@ -43,8 +45,8 @@ class CollisionAndDestructionTests(unittest.TestCase):
         self.assertEqual(player.health, 2)
 
     def test_mystery_ship_destruction(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         prev_score = game_state.score
         ship = MysteryShip(game, game_state)
         self.assertEqual(len(game.all_sprites), 1)
@@ -56,8 +58,8 @@ class CollisionAndDestructionTests(unittest.TestCase):
         self.assertEqual(len(game_state.rockets), 0)
 
     def test_bunkers(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         bunker = Bunker(game, 0, 0, game_state)
         rocket = Rocket(game, 0, 0)
         game_state.rockets = [rocket]
@@ -71,14 +73,14 @@ class CollisionAndDestructionTests(unittest.TestCase):
 
 class GenerationsTests(unittest.TestCase):
     def test_bunkers_generation(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         game.generate_bunkers(4, game_state)
         self.assertEqual(len(game.all_sprites), 4)
 
     def test_invader_generation(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         game.generate_invaders(1, game_state)
         self.assertEqual(len(game.all_sprites), 22)
         self.assertEqual(len(game_state.invaders), 2)
@@ -87,8 +89,8 @@ class GenerationsTests(unittest.TestCase):
 
 class MovementTests(unittest.TestCase):
     def test_mystery_ship_destruction_on_leaving_screen(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         prev_score = game_state.score
         ship = MysteryShip(game, game_state)
         self.assertEqual(len(game.all_sprites), 1)
@@ -98,8 +100,8 @@ class MovementTests(unittest.TestCase):
         self.assertEqual(prev_score, game_state.score)
 
     def test_invader_moves(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         invader = Invader(game, 0, 0, 0, 1, game_state)
         game_state.invaders = [[invader]]
         time.sleep(1)
@@ -109,8 +111,8 @@ class MovementTests(unittest.TestCase):
 
 class GameOverTests(unittest.TestCase):
     def test_game_over_on_invasion(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         invader = Invader(game, 0, 0, 0, 1, game_state)
         game_state.invaders = [[invader]]
         invader.rect.bottom = game.height - 90
@@ -118,8 +120,8 @@ class GameOverTests(unittest.TestCase):
         self.assertTrue(game_state.lost)
 
     def test_game_ends_on_player_death(self):
-        game = Game(600, 800)
-        game_state = GameState()
+        game = GameResources()
+        game_state = GameState(600, 800)
         player = Player(game, game.width / 2, game.height - 100, game_state)
         player.health = 1
         rocket = InvaderRocket(game, game.width / 2, game.height - 100)

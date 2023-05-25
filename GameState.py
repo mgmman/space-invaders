@@ -1,6 +1,11 @@
+import pygame
+
+
 class GameState:
-    def __init__(self):
+    def __init__(self, height, width):
         self.invaders = []
+        self.height = height
+        self.width = width
         self.invader_rockets = []
         self.rockets = []
         self.lost = False
@@ -8,3 +13,5 @@ class GameState:
         self.done = False
         self.won = False
         self.mystery_ship_flying = False
+        self.all_sprites = pygame.sprite.Group()
+
